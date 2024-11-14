@@ -28,7 +28,7 @@ train.Sex.unique()
 train.isnull().sum()
 ```
 * 가설 설정
-##### 저는 나이가 0세에서 20세, 20세에서 40세이면서 Pclass 등급이 높은 여성의 생존율이 높을 것이라 가정했습니다.
+##### 저는 나이가 0세에서 20세, 20세에서 40세인 Pclass 등급이 높은 여성의 생존율이 높을 것이라 가정했습니다.
 
 * 데이터 삭제
 ```python
@@ -103,13 +103,58 @@ print(survival_pclass_rate)
 * 데이터 시각화 결과
 데이터 시각화로 인해 알 수 있는 부분은
 1. 여성이 남성보다 더 많이 살아 남았다.
-2. 나이가 0세부터 20세까지와 20세부터 40세까지인 사람이 생존율이 높았다.
+2. 나이가 0세에서 20세, 20세에서 40세인 사람이 생존율이 높았다.
 3. Pclass가 높은 사람이 생존율이 높았다.
 
+* 모델 학습 및 추론
+```python
+# 학습용  데이터로 만들기 위해 copy
+train_df = df.copy()
+test_df = test.copy()
+# 필요 없는 특성 지우기
+test_df = test_df.drop(columns=['Cabin'])
+test_df = test_df.drop(columns=['Name'])
+test_df = test_df.drop(columns=['SibSp'])
+test_df = test_df.drop(columns=['Parch'])
+test_df = test_df.drop(columns=['Ticket'])
+test_df = test_df.drop(columns=['Fare'])
+test_df = test_df.drop(columns=['Embarked'])
+test_df = test_df.drop(columns=['PassengerId'])
+#나이 결측치 채우기
+test_df['Age'] = test_df['Age'].fillna(test_df['Age'].interpolate())
+# 남성으 0 여성이 1값으로 바꾸기
+test_df.loc[test_df['Sex'] == 'male', 'Sex'] = 0
+test_df.loc[test_df['Sex'] == 'female', 'Sex'] = 1
+#trian 데이터 타입 확인 후 'Sex' 데이터 타입 int로 변환 
+train_df.dtypes
+train_df['Sex'] = train_df['Sex'].replace({'male': 1, 'female': 0})
+test_df['Sex'] = test_df['Sex'].replace({'male': 1, 'female': 0})
+# RandomForestClassifier를 사용하여 Titanic 데이터셋에서 승객의 생존 여부를 예측
+from sklearn.ensemble import RandomForestClassifier
 
+y = train_df['Survived']
 
+features = ['Pclass', 'Sex', 'Age']
+X = pd.get_dummies(train_df[features])
+X_test = pd.get_dummies(test_df[features])
 
+model = RandomForestClassifier(n_estimators=100, max_depth=5, random_state=1)
+model.fit(X, y)
+predictions = model.predict(X_test)
 
+output = pd.DataFrame({'PassengerId': test.PassengerId, 'Survived': predictions})
+output.to_csv('submission.csv', index=False)
+print("Your submission was successfully saved!")
+
+from sklearn.metrics import accuracy_score
+
+# 모델 학습 평가 
+
+y_pred = model.predict(X)  # 학습 데이터에 대한 예측
+accuracy = accuracy_score(y, y_pred)
+print(f"Accuracy: {accuracy:.4f}")
+
+```
 
 ## 개발환경
 * python 3.10
