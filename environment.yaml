@@ -1,0 +1,10 @@
+name: taitanic
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pandas=2.2.2
+  - numpy=1.26.4
+  - scikit_learn=1.5.1
+  - matplotlib = 3.9.2
