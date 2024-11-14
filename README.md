@@ -120,6 +120,7 @@ print(survival_pclass_rate)
 # 가상환경 생성
 conda create -n ML python=3.10
 # 필요한 라이브러리 설치
-conda install nummpy
-conda install matplotlib
-conda install pandas
+Numpy: conda install nummpy
+Matplotlib:conda install matplotlib
+Pandas: conda install pandas
+Scikit-learn: conda install -c conda-forge scikit-learn
